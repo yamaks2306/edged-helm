@@ -1,0 +1,38 @@
+{{- if .Values.postgresdb.postgresdbInternal.enabled | default false }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "edgedb.postgres.name" . }}
+  labels:
+    {{- include "edgedb.postgres.labels" . | nindent 4 }}
+spec:
+  description: {{ .Values.postgresdb.postgresdbInternal.description | default "postgres cluster"}}
+  imageName: {{ .Values.postgresdb.postgresdbInternal.image }}
+  instances: {{ .Values.postgresdb.postgresdbInternal.instances }}
+  superuserSecret:
+    name: {{ include "edgedb.postgres.name" . }}-auth
+  enableSuperuserAccess: {{ .Values.postgresdb.postgresdbInternal.enableAdminAccess }}
+  startDelay: {{ .Values.postgresdb.postgresdbInternal.startDelay }}
+  stopDelay: {{ .Values.postgresdb.postgresdbInternal.stopDelay }}
+  primaryUpdateStrategy: {{ .Values.postgresdb.postgresdbInternal.primaryUpdateStrategy }}
+  logLevel: {{ .Values.postgresdb.postgresdbInternal.logLevel }}
+  bootstrap:
+    initdb:
+      database: {{ .Values.postgresdb.postgresdbInternal.database | default "edgedb" }}
+      owner: {{ .Values.postgresdb.postgresdbInternal.owner | default "postgres" }}
+      secret:
+        name: {{ include "edgedb.postgres.name" . }}-auth
+  {{- with .Values.postgresdb.postgresdbInternal.storage }}
+  storage:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  postgresql:
+    {{- with .Values.postgresdb.postgresdbInternal.parameters }}
+    parameters:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.postgresdb.postgresdbInternal.pghba }}
+    pg_hba:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,183 @@
+fullnameOverride: ""
+nameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+image:
+  pullPolicy: "IfNotPresent"
+  repository: edgedb/edgedb
+  tag: 5.5
+imagePullSecrets: []
+
+autoScaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  scaleDown:
+    stabilizationWindowSeconds: 300
+    policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 15
+  scaleUp:
+    stabilizationWindowSeconds: 0
+    policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 15
+
+replicas: 1
+
+podSecurityContext:
+  fsGroup: 999
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  seccompProfile:
+    type: RuntimeDefault
+terminationGracePeriodSeconds: 10
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  runAsGroup: 999
+  runAsUser: 999
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+readinessProbe:
+  tcpSocket:
+    port: 5656
+  initialDelaySeconds: 5
+  periodSeconds: 10
+livenessProbe:
+  tcpSocket:
+    port: 5656
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+# EdgeDB TLS security configuration
+tls:
+  enabled: true
+  secretName: ""
+  duration: 2160h # 90 days
+  renewBefore: 360h # 15 days before expiration
+  privateKey:
+    algorithm: ECDSA
+    size: 384
+  subject:
+    organizations:
+      - EdgeDB
+  commonName: "edgedb.example.com"
+  additionalDnsNames: []
+  issuerName: ""
+  issuerKind: ""
+
+service:
+  type: ClusterIP
+  port: 5656
+  name: edgedb
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+  - host: edgedb.example.com
+    paths:
+    - path: /
+      pathType: Prefix
+
+nodeSelector: {}
+
+affinity: {}
+
+tolerations: []
+
+
+edgedb:
+  adminUI: enabled
+  auth:
+    username: "edgedb"
+    password: "your-edgedb-password"
+  logLevel: info
+  # EdgeDB storage configuration. ONLY used if postgresdb-internal or postgresdb-external is not enabled
+  storage:
+    size: 5Gi
+    storageClassName: do-block-storage
+  # Default authentication method for EdgeDB [SCRAM (default), Trust]. When set to Trust, the database will 
+  # allow complete unauthenticated access for all who have access to the database port.
+  defaultAuthMethod: ""
+  # HTTP endpoint security [tls (default), optional]. When set to optional, non-TLS connections are allowed.
+  httpEndpointSecurity: ""
+  # When set to insecure_dev_mode, sets EDGEDB_SERVER_DEFAULT_AUTH_METHOD to Trust, and EDGEDB_SERVER_TLS_CERT_MODE 
+  # to generate_self_signed (unless an explicit TLS certificate is specified). Finally, if this option is set, the 
+  # server will accept plaintext HTTP connections.
+  serverSecurity: ""
+  
+  annotations:
+    
+
+postgresdb:
+  postgresdbExternal:
+    enabled: false
+    dsn: "" #"postgres://postgres:super-secret-password@postgresdb-external.example.com:5432/edgedb"
+  postgresdbInternal:
+    enabled: true
+    database: "edgedb"
+    owner: "postgres"
+    # Note: Username NEEDs to be postgres, do not change whithout reason
+    auth:
+      username: "postgres"
+      password: "super-secret-password"
+      database: "edgedb"
+    enableAdminAccess: true
+    description: ""
+    image: "ghcr.io/cloudnative-pg/postgresql:16.1"
+    instances: 3
+
+    startDelay: 30
+    stopDelay: 100
+    primaryUpdateStrategy: unsupervised
+    logLevel: debug
+
+    storage:
+      size: 5Gi
+      storageClass: do-block-storage
+
+    # Generated with https://pgtune.leopard.in.ua
+    parameters:
+      max_connections: '100'
+      shared_buffers: '512MB'
+      effective_cache_size: '1536MB'
+      maintenance_work_mem: '128MB'
+      checkpoint_completion_target: '0.9'
+      wal_buffers: '16MB'
+      default_statistics_target: '100'
+      random_page_cost: '1.1'
+      effective_io_concurrency: '300'
+      work_mem: '1310kB'
+      huge_pages: 'off'
+      min_wal_size: '1GB'
+      max_wal_size: '4GB'
+
+    pghba:
+    - "host all all all scram-sha-256"
+
+
+
+
+
+

@@ -1,0 +1,54 @@
+{{- if .Values.autoScaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "edgedb.fullname" . }}-hpa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "edgedb.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "edgedb.fullname" . }}
+  minReplicas: {{ .Values.autoScaling.minReplicas }}
+  maxReplicas: {{ .Values.autoScaling.maxReplicas }}
+  metrics:
+    {{- if .Values.autoScaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          targetAverageUtilization: {{ .Values.autoScaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.autoScaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          targetAverageUtilization: {{ .Values.autoScaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoScaling.scaleDown.stabilizationWindowSeconds }}
+      {{- with .Values.autoScaling.scaleDown.policies }}
+      policies:
+        {{- range . }}
+        - type: {{ .type }}
+          value: {{ .value }}
+          periodSeconds: {{ .periodSeconds }}
+        {{- end }}
+      {{- end }}
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.autoScaling.scaleUp.stabilizationWindowSeconds }}
+      {{- with .Values.autoScaling.scaleUp.policies }}
+      policies:
+        {{- range . }}
+        - type: {{ .type }}
+          value: {{ .value }}
+          periodSeconds: {{ .periodSeconds }}
+        {{- end }}
+      {{- end }}
+{{- end }}

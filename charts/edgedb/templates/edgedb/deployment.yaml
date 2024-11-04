@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "edgedb.fullname" . }}
+  annotations:
+    {{- if .Values.postgresdb.postgresdbInternal.enabled | default false }}
+    helm.sh/hook-weight: "2"
+    helm.sh/hook-requires: edgedb-db
+    {{- end }}
+    {{- with .Values.edgedb.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "edgedb.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoScaling.enabled }}
+  replicas: {{ .Values.replicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "edgedb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "edgedb.labels" . | nindent 8 }}
+    spec:
+      {{- if .Values.serviceAccount.create | default false }}
+      serviceAccountName: {{ include "edgedb.serviceAccountName" . }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- if .Values.postgresdb.postgresdbInternal.enabled | default false }}
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command: ['sh', '-c', 'until nc -z {{ include "edgedb.postgres.name" . }}-rw 5432; do echo waiting for postgres; sleep 2; done;']
+      {{- end }}
+      containers:
+      - name: {{ include "edgedb.fullname" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        volumeMounts:
+        {{- if and (not .Values.postgresdb.postgresdbInternal.enabled) (not .Values.postgresdb.postgresdbExternal.enabled) }}
+        - name: edgedb-data
+          mountPath: /var/lib/edgedb/data
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-cert
+          mountPath: /etc/ssl/edgedb
+          readOnly: true
+        {{- end }}
+        env:
+        - envFrom:
+          - secretRef:
+              name: {{ include "edgedb.fullname" . }}-auth
+        - name: EDGEDB_SERVER_ADMIN_UI
+          value: {{ .Values.edgedb.adminUI | default "enabled" }}
+        {{- if .Values.tls.enabled }}
+        - name: EDGEDB_SERVER_TLS_CERT_FILE
+          value: /etc/edgedb/tls/tls.crt
+        - name: EDGEDB_SERVER_TLS_KEY_FILE
+          value: /etc/edgedb/tls/tls.key
+        {{- end }}
+        - name: EDGEDB_DOCKER_LOG_LEVEL
+          value: {{ .Values.edgedb.logLevel | default "info" }}
+        {{- if or .Values.postgresdb.postgresdbInternal.enabled .Values.postgresdb.postgresdbExternal.enabled }}
+        - envFrom:
+          - secretRef:
+              name: {{ include "edgedb.fullname" . }}-backend
+        {{- end }}
+        - name: EDGEDB_SERVER_DEFAULT_AUTH_METHOD
+          value: {{ .Values.edgedb.defaultAuthMethod | default "SCRAM" }}
+        - name: EDGEDB_SERVER_HTTP_ENDPOINT_SECURITY
+          value: {{ .Values.edgedb.httpEndpointSecurity | default "tls" }}
+        {{- if .Values.edgedb.serverSecurity }}
+        - name: EDGEDB_SERVER_SECURITY
+          value: {{ .Values.edgedb.serverSecurity }}
+        {{- end }}
+        - name: EDGEDB_SERVER_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: EDGEDB_INSTANCE_NAME
+          value: {{ include "edgedb.fullname" . }}
+        - name: EDGEDB_SERVER_PORT
+          value: {{ .Values.service.port }}
+        {{- if .Values.tls.enabled }}
+        - name: EDGEDB_SERVER_TLS_CERT_MODE
+          value: require_file
+        {{- else }}
+        - name: EDGEDB_SERVER_TLS_CERT_MODE
+          value: generate_self_signed
+        {{- end }}
+      volumes:
+      {{- if .Values.tls.enabled }}
+      - name: tls-cert
+        secret:
+          secretName: {{ .Release.Name }}-tls 
+      {{- end }}
+      {{- if and (not .Values.postgresdb.postgresdbInternal.enabled) (not .Values.postgresdb.postgresdbExternal.enabled) }}
+      - name: edgedb-data
+        persistentVolumeClaim:
+          claimName: {{ include "edgedb.fullname" . }}-data
+      {{- end }} 
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
