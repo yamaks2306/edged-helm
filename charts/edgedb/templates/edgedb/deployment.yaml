@@ -104,7 +104,7 @@ spec:
         - name: EDGEDB_INSTANCE_NAME
           value: {{ include "edgedb.fullname" . }}
         - name: EDGEDB_SERVER_PORT
-          value: {{ .Values.service.port }}
+          value: {{ .Values.service.port | quote }}
         {{- if .Values.tls.enabled }}
         - name: EDGEDB_SERVER_TLS_CERT_MODE
           value: require_file
