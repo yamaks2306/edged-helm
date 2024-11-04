@@ -115,7 +115,7 @@ spec:
       {{- if .Values.tls.enabled }}
       - name: tls-cert
         secret:
-          secretName: {{ .Release.Name }}-tls 
+          secretName: {{ .Release.Name }}-tls-cert
       {{- end }}
       {{- if and (not .Values.postgresdb.postgresdbInternal.enabled) (not .Values.postgresdb.postgresdbExternal.enabled) }}
       - name: edgedb-data
