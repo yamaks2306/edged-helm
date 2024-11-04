@@ -67,13 +67,17 @@ spec:
         {{- end }}
         {{- if .Values.tls.enabled }}
         - name: tls-cert
-          mountPath: /etc/ssl/edgedb
+          mountPath: /etc/edgedb/tls
           readOnly: true
         {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ include "edgedb.fullname" . }}-auth
+        {{- if or .Values.postgresdb.postgresdbInternal.enabled .Values.postgresdb.postgresdbExternal.enabled }}
+        - secretRef:
+            name: {{ include "edgedb.fullname" . }}-backend
+        {{- end }}
         env:
-        - envFrom:
-          - secretRef:
-              name: {{ include "edgedb.fullname" . }}-auth
         - name: EDGEDB_SERVER_ADMIN_UI
           value: {{ .Values.edgedb.adminUI | default "enabled" }}
         {{- if .Values.tls.enabled }}
@@ -84,11 +88,6 @@ spec:
         {{- end }}
         - name: EDGEDB_DOCKER_LOG_LEVEL
           value: {{ .Values.edgedb.logLevel | default "info" }}
-        {{- if or .Values.postgresdb.postgresdbInternal.enabled .Values.postgresdb.postgresdbExternal.enabled }}
-        - envFrom:
-          - secretRef:
-              name: {{ include "edgedb.fullname" . }}-backend
-        {{- end }}
         - name: EDGEDB_SERVER_DEFAULT_AUTH_METHOD
           value: {{ .Values.edgedb.defaultAuthMethod | default "SCRAM" }}
         - name: EDGEDB_SERVER_HTTP_ENDPOINT_SECURITY
