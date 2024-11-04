@@ -2,6 +2,6 @@ apiVersion: v2
 name: edgedb
 description: EdgeDB helm chart
 type: application
-version: 0.1.3
+version: 0.1.4
 appVersion: "5.5"
 
