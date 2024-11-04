@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  edgedb:
+  - apiVersion: v2
+    appVersion: "5.5"
+    created: "2024-11-04T14:42:34.745924+03:00"
+    description: EdgeDB helm chart
+    digest: 815f79db560376a000fc446ed6ddd3c5d65e74c03b54f8e3f98251fa734e48fe
+    name: edgedb
+    type: application
+    urls:
+    - edgedb-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-11-04T14:42:34.744092+03:00"
