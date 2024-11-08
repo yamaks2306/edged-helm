@@ -59,7 +59,7 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         ports:
-        - containerPort: {{ .Values.service.port }}
+        - containerPort: 5656
         volumeMounts:
         {{- if and (not .Values.postgresdb.postgresdbInternal.enabled) (not .Values.postgresdb.postgresdbExternal.enabled) }}
         - name: edgedb-data
