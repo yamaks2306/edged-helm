@@ -3,6 +3,16 @@ entries:
   edgedb:
   - apiVersion: v2
     appVersion: "5.5"
+    created: "2024-11-08T13:30:11.869694776Z"
+    description: EdgeDB helm chart
+    digest: bc6c3e48811f2f001b2c22067dcd9bae6975a7eb9e72caf648928e1557bc02b9
+    name: edgedb
+    type: application
+    urls:
+    - https://github.com/yamaks2306/edged-helm/releases/download/edgedb-0.1.6/edgedb-0.1.6.tgz
+    version: 0.1.6
+  - apiVersion: v2
+    appVersion: "5.5"
     created: "2024-11-04T13:28:08.92560418Z"
     description: EdgeDB helm chart
     digest: f34a4c82106aef19813983bf18e2a4cd5b2906dcb40e1378bc0842b90b4e8ba8
@@ -51,4 +61,4 @@ entries:
     urls:
     - https://github.com/yamaks2306/edged-helm/releases/download/edgedb-0.1.1/edgedb-0.1.1.tgz
     version: 0.1.1
-generated: "2024-11-04T13:28:08.925625951Z"
+generated: "2024-11-08T13:30:11.869726736Z"
