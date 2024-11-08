@@ -23,7 +23,7 @@ spec:
               service:
                 name: {{ include "edgedb.fullname" $ }}
                 port:
-                  number: {{ .Values.service.port }}
+                  number: 5656
           {{- end }}
     {{- end }}
 {{- end }}

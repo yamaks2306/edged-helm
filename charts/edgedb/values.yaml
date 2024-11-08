@@ -87,7 +87,8 @@ tls:
 
 service:
   type: ClusterIP
-  port: 5656
+  # Disabled parameter
+  # port: 5656
   name: edgedb
 
 ingress:
