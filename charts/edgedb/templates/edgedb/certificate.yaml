@@ -25,6 +25,7 @@ spec:
     - '*.{{ include "edgedb.fullname" . }}.{{ .Release.Namespace }}.svc'
     - '*.{{ include "edgedb.fullname" . }}.{{ .Release.Namespace }}'
     - '{{ include "edgedb.fullname" . }}'
+    - '{{ .Values.tls.commonName }}'
     {{- range .Values.tls.additionalDnsNames }}
     - {{ . }}
     {{- end }}
