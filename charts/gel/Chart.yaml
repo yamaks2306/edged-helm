@@ -1,0 +1,7 @@
+apiVersion: v2
+name: gel
+description: GEL helm chart
+type: application
+version: 0.2.0
+appVersion: "6.5"
+

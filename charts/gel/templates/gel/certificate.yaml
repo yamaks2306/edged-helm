@@ -2,12 +2,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "edgedb.fullname" . }}-tls-cert
+  name: {{ include "gel.fullname" . }}-tls-cert
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "edgedb.labels" . | nindent 4 }}
+    {{- include "gel.labels" . | nindent 4 }}
 spec:
-  secretName: {{ default (printf "%s-tls-cert" (include "edgedb.fullname" .)) .Values.tls.secretName }}
+  secretName: {{ default (printf "%s-tls-cert" (include "gel.fullname" .)) .Values.tls.secretName }}
   duration: {{ .Values.tls.duration }}
   renewBefore: {{ .Values.tls.renewBefore }}
   privateKey:
@@ -20,11 +20,11 @@ spec:
       {{- end }}
   commonName: {{ .Values.tls.commonName }}
   dnsNames:
-    - '*.{{ include "edgedb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local'
-    - '*.{{ include "edgedb.fullname" . }}.{{ .Release.Namespace }}.svc.local'
-    - '*.{{ include "edgedb.fullname" . }}.{{ .Release.Namespace }}.svc'
-    - '*.{{ include "edgedb.fullname" . }}.{{ .Release.Namespace }}'
-    - '{{ include "edgedb.fullname" . }}'
+    - '*.{{ include "gel.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local'
+    - '*.{{ include "gel.fullname" . }}.{{ .Release.Namespace }}.svc.local'
+    - '*.{{ include "gel.fullname" . }}.{{ .Release.Namespace }}.svc'
+    - '*.{{ include "gel.fullname" . }}.{{ .Release.Namespace }}'
+    - '{{ include "gel.fullname" . }}'
     - '{{ .Values.tls.commonName }}'
     {{- range .Values.tls.additionalDnsNames }}
     - {{ . }}

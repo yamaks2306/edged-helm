@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "edgedb.fullname" . }}
+  name: {{ include "gel.fullname" . }}
   annotations:
     {{- if .Values.postgresdb.postgresdbInternal.enabled | default false }}
     helm.sh/hook-weight: "2"
-    helm.sh/hook-requires: edgedb-db
+    helm.sh/hook-requires: gel-db
     {{- end }}
-    {{- with .Values.edgedb.annotations }}
+    {{- with .Values.gel.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{- include "edgedb.labels" . | nindent 4 }}
+    {{- include "gel.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoScaling.enabled }}
   replicas: {{ .Values.replicas }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "edgedb.selectorLabels" . | nindent 6 }}
+      {{- include "gel.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "edgedb.labels" . | nindent 8 }}
+        {{- include "gel.labels" . | nindent 8 }}
     spec:
       {{- if .Values.serviceAccount.create | default false }}
-      serviceAccountName: {{ include "edgedb.serviceAccountName" . }}
+      serviceAccountName: {{ include "gel.serviceAccountName" . }}
       {{- end }}
       {{- with .Values.podSecurityContext }}
       securityContext:
@@ -36,10 +36,10 @@ spec:
       initContainers:
       - name: wait-for-postgres
         image: busybox
-        command: ['sh', '-c', 'until nc -z {{ include "edgedb.postgres.name" . }}-rw 5432; do echo waiting for postgres; sleep 2; done;']
+        command: ['sh', '-c', 'until nc -z {{ include "gel.postgres.name" . }}-rw 5432; do echo waiting for postgres; sleep 2; done;']
       {{- end }}
       containers:
-      - name: {{ include "edgedb.fullname" . }}
+      - name: {{ include "gel.fullname" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- with .Values.securityContext }}
@@ -62,51 +62,52 @@ spec:
         - containerPort: 5656
         volumeMounts:
         {{- if and (not .Values.postgresdb.postgresdbInternal.enabled) (not .Values.postgresdb.postgresdbExternal.enabled) }}
-        - name: edgedb-data
-          mountPath: /var/lib/edgedb/data
+        - name: gel-data
+          mountPath: /var/lib
+          subpath: gel/data
         {{- end }}
         {{- if .Values.tls.enabled }}
         - name: tls-cert
-          mountPath: /etc/edgedb/tls
+          mountPath: /etc/gel/tls
           readOnly: true
         {{- end }}
         envFrom:
         - secretRef:
-            name: {{ include "edgedb.fullname" . }}-auth
+            name: {{ include "gel.fullname" . }}-auth
         {{- if or .Values.postgresdb.postgresdbInternal.enabled .Values.postgresdb.postgresdbExternal.enabled }}
         - secretRef:
-            name: {{ include "edgedb.fullname" . }}-backend
+            name: {{ include "gel.fullname" . }}-backend
         {{- end }}
         env:
-        - name: EDGEDB_SERVER_ADMIN_UI
-          value: {{ .Values.edgedb.adminUI | default "enabled" }}
+        - name: GEL_SERVER_ADMIN_UI
+          value: {{ .Values.gel.adminUI | default "enabled" }}
         {{- if .Values.tls.enabled }}
-        - name: EDGEDB_SERVER_TLS_CERT_FILE
-          value: /etc/edgedb/tls/tls.crt
-        - name: EDGEDB_SERVER_TLS_KEY_FILE
-          value: /etc/edgedb/tls/tls.key
+        - name: GEL_SERVER_TLS_CERT_FILE
+          value: /etc/gel/tls/tls.crt
+        - name: GEL_SERVER_TLS_KEY_FILE
+          value: /etc/gel/tls/tls.key
         {{- end }}
-        - name: EDGEDB_DOCKER_LOG_LEVEL
-          value: {{ .Values.edgedb.logLevel | default "info" }}
-        - name: EDGEDB_SERVER_DEFAULT_AUTH_METHOD
-          value: {{ .Values.edgedb.defaultAuthMethod | default "SCRAM" }}
-        - name: EDGEDB_SERVER_HTTP_ENDPOINT_SECURITY
-          value: {{ .Values.edgedb.httpEndpointSecurity | default "tls" }}
-        {{- if .Values.edgedb.serverSecurity }}
-        - name: EDGEDB_SERVER_SECURITY
-          value: {{ .Values.edgedb.serverSecurity }}
+        - name: GEL_DOCKER_LOG_LEVEL
+          value: {{ .Values.gel.logLevel | default "info" }}
+        - name: GEL_SERVER_DEFAULT_AUTH_METHOD
+          value: {{ .Values.gel.defaultAuthMethod | default "SCRAM" }}
+        - name: GEL_SERVER_HTTP_ENDPOINT_SECURITY
+          value: {{ .Values.gel.httpEndpointSecurity | default "tls" }}
+        {{- if .Values.gel.serverSecurity }}
+        - name: GEL_SERVER_SECURITY
+          value: {{ .Values.gel.serverSecurity }}
         {{- end }}
-        - name: EDGEDB_SERVER_HOSTNAME
+        - name: GEL_SERVER_HOSTNAME
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: EDGEDB_INSTANCE_NAME
-          value: {{ include "edgedb.fullname" . }}
+        - name: GEL_INSTANCE_NAME
+          value: {{ include "gel.fullname" . }}
         {{- if .Values.tls.enabled }}
-        - name: EDGEDB_SERVER_TLS_CERT_MODE
+        - name: GEL_SERVER_TLS_CERT_MODE
           value: require_file
         {{- else }}
-        - name: EDGEDB_SERVER_TLS_CERT_MODE
+        - name: GEL_SERVER_TLS_CERT_MODE
           value: generate_self_signed
         {{- end }}
       volumes:
@@ -116,9 +117,9 @@ spec:
           secretName: {{ .Release.Name }}-tls-cert
       {{- end }}
       {{- if and (not .Values.postgresdb.postgresdbInternal.enabled) (not .Values.postgresdb.postgresdbExternal.enabled) }}
-      - name: edgedb-data
+      - name: gel-data
         persistentVolumeClaim:
-          claimName: {{ include "edgedb.fullname" . }}-data
+          claimName: {{ include "gel.fullname" . }}-data
       {{- end }} 
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

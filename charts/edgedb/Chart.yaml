@@ -1,7 +1,0 @@
-apiVersion: v2
-name: edgedb
-description: EdgeDB helm chart
-type: application
-version: 0.1.8
-appVersion: "5.5"
-

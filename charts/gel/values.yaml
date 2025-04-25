@@ -7,8 +7,8 @@ serviceAccount:
 
 image:
   pullPolicy: "IfNotPresent"
-  repository: edgedb/edgedb
-  tag: 5.5
+  repository: geldata/gel
+  tag: 6.5
 imagePullSecrets: []
 
 autoScaling:
@@ -68,7 +68,7 @@ livenessProbe:
   initialDelaySeconds: 15
   periodSeconds: 20
 
-# EdgeDB TLS security configuration
+# GelDB TLS security configuration
 tls:
   enabled: true
   secretName: ""
@@ -79,24 +79,23 @@ tls:
     size: 384
   subject:
     organizations:
-      - EdgeDB
-  commonName: "edgedb.example.com"
+      - GEL
+  commonName: "gel.example.com"
   additionalDnsNames: []
   issuerName: ""
   issuerKind: ""
 
 service:
   type: ClusterIP
-  # Disabled parameter
-  # port: 5656
-  name: edgedb
+  port: 5656
+  name: gel
 
 ingress:
   enabled: false
   className: nginx
   annotations: {}
   hosts:
-  - host: edgedb.example.com
+  - host: gel.example.com
     paths:
     - path: /
       pathType: Prefix
@@ -107,23 +106,22 @@ affinity: {}
 
 tolerations: []
 
-
-edgedb:
+gel:
   adminUI: enabled
   auth:
-    username: "edgedb"
-    password: "your-edgedb-password"
+    username: "gel"
+    password: "your-gel-password"
   logLevel: info
-  # EdgeDB storage configuration. ONLY used if postgresdb-internal or postgresdb-external is not enabled
+  # GEL storage configuration. ONLY used if postgresdb-internal or postgresdb-external is not enabled
   storage:
     size: 5Gi
     storageClassName: do-block-storage
-  # Default authentication method for EdgeDB [SCRAM (default), Trust]. When set to Trust, the database will 
+  # Default authentication method for GEL [SCRAM (default), Trust]. When set to Trust, the database will 
   # allow complete unauthenticated access for all who have access to the database port.
   defaultAuthMethod: ""
   # HTTP endpoint security [tls (default), optional]. When set to optional, non-TLS connections are allowed.
   httpEndpointSecurity: ""
-  # When set to insecure_dev_mode, sets EDGEDB_SERVER_DEFAULT_AUTH_METHOD to Trust, and EDGEDB_SERVER_TLS_CERT_MODE 
+  # When set to insecure_dev_mode, sets GEL_SERVER_DEFAULT_AUTH_METHOD to Trust, and GEL_SERVER_TLS_CERT_MODE 
   # to generate_self_signed (unless an explicit TLS certificate is specified). Finally, if this option is set, the 
   # server will accept plaintext HTTP connections.
   serverSecurity: ""
@@ -134,16 +132,16 @@ edgedb:
 postgresdb:
   postgresdbExternal:
     enabled: false
-    dsn: "" #"postgres://postgres:super-secret-password@postgresdb-external.example.com:5432/edgedb"
+    dsn: "" #"postgres://postgres:super-secret-password@postgresdb-external.example.com:5432/gel"
   postgresdbInternal:
     enabled: true
-    database: "edgedb"
+    database: "gel"
     owner: "postgres"
     # Note: Username NEEDs to be postgres, do not change whithout reason
     auth:
       username: "postgres"
       password: "super-secret-password"
-      database: "edgedb"
+      database: "gel"
     enableAdminAccess: true
     description: ""
     image: "ghcr.io/cloudnative-pg/postgresql:16.1"

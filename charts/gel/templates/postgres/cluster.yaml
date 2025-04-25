@@ -2,15 +2,15 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: {{ include "edgedb.postgres.name" . }}
+  name: {{ include "gel.postgres.name" . }}
   labels:
-    {{- include "edgedb.postgres.labels" . | nindent 4 }}
+    {{- include "gel.postgres.labels" . | nindent 4 }}
 spec:
   description: {{ .Values.postgresdb.postgresdbInternal.description | default "postgres cluster"}}
   imageName: {{ .Values.postgresdb.postgresdbInternal.image }}
   instances: {{ .Values.postgresdb.postgresdbInternal.instances }}
   superuserSecret:
-    name: {{ include "edgedb.postgres.name" . }}-auth
+    name: {{ include "gel.postgres.name" . }}-auth
   enableSuperuserAccess: {{ .Values.postgresdb.postgresdbInternal.enableAdminAccess }}
   startDelay: {{ .Values.postgresdb.postgresdbInternal.startDelay }}
   stopDelay: {{ .Values.postgresdb.postgresdbInternal.stopDelay }}
@@ -18,10 +18,10 @@ spec:
   logLevel: {{ .Values.postgresdb.postgresdbInternal.logLevel }}
   bootstrap:
     initdb:
-      database: {{ .Values.postgresdb.postgresdbInternal.database | default "edgedb" }}
+      database: {{ .Values.postgresdb.postgresdbInternal.database | default "gel" }}
       owner: {{ .Values.postgresdb.postgresdbInternal.owner | default "postgres" }}
       secret:
-        name: {{ include "edgedb.postgres.name" . }}-auth
+        name: {{ include "gel.postgres.name" . }}-auth
   {{- with .Values.postgresdb.postgresdbInternal.storage }}
   storage:
     {{- toYaml . | nindent 4 }}

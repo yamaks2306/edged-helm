@@ -1,10 +1,12 @@
-# EdgeDB Helm Chart
+# GEL Helm Chart
 
-Helm chart for deploying EdgeDB in a Kubernetes cluster.
+> ⚠️ **Important Update**: Starting from version 6.0, EdgeDB has been renamed to GEL. This helm chart has been updated to support the new version and name. All references to EdgeDB in code and documentation have been replaced with GEL.
+
+Helm chart for deploying GEL in a Kubernetes cluster.
 
 ## Description
 
-This Helm chart allows you to install and configure EdgeDB - the next-generation object-relational database. EdgeDB can be deployed in standalone mode, with existing external PostgreSQL backend, or PostgreSQL can be deployed with the EdgeDB cluster.
+This Helm chart allows you to install and configure GEL - the next-generation object-relational database. GEL can be deployed in standalone mode, with existing external PostgreSQL backend, or PostgreSQL can be deployed with the GEL cluster.
 
 ## Prerequisites
 
@@ -32,8 +34,8 @@ This Helm chart allows you to install and configure EdgeDB - the next-generation
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `image.repository` | EdgeDB image repository | `edgedb/edgedb` |
-| `image.tag` | EdgeDB version | `5.5` |
+| `image.repository` | GEL image repository | `geldata/gel` |
+| `image.tag` | GEL version | `6.5` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `imagePullSecrets` | Image pull secrets | `[]` |
 
@@ -88,67 +90,10 @@ This Helm chart allows you to install and configure EdgeDB - the next-generation
 | `tls.renewBefore` | Renew certificate before | `360h` |
 | `tls.privateKey.algorithm` | Private key algorithm | `ECDSA` |
 | `tls.privateKey.size` | Key size | `384` |
-| `tls.commonName` | Certificate common name | `edgedb.example.com` |
+| `tls.commonName` | Certificate common name | `gel.example.com` |
 
 ### Service
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `service.type` | Service type | `ClusterIP` |
-| `service.port` | Service port | `5656` |
-| `service.name` | Service name | `edgedb` |
-
-### Ingress
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `ingress.enabled` | Enable ingress | `false` |
-| `ingress.className` | Ingress class name | `nginx` |
-| `ingress.annotations` | Ingress annotations | `{}` |
-| `ingress.hosts` | List of hosts | `[]` |
-
-### EdgeDB
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `edgedb.adminUI` | Enable Admin UI | `enabled` |
-| `edgedb.auth.username` | Username | `edgedb` |
-| `edgedb.auth.password` | Password | `your-edgedb-password` |
-| `edgedb.logLevel` | Log level | `info` |
-| `edgedb.storage.size` | Storage size | `5Gi` |
-| `edgedb.storage.storageClassName` | Storage Class | `do-block-storage` |
-| `edgedb.defaultAuthMethod` | Default auth method | `""` |
-| `edgedb.httpEndpointSecurity` | HTTP endpoint security | `""` |
-| `edgedb.serverSecurity` | Server security mode | `""` |
-
-### PostgreSQL
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `postgresdb.postgresdbExternal.enabled` | Use external PostgreSQL | `false` |
-| `postgresdb.postgresdbExternal.dsn` | External DB DSN | `""` |
-| `postgresdb.postgresdbInternal.enabled` | Deploy PostgreSQL | `true` |
-| `postgresdb.postgresdbInternal.database` | Database name | `edgedb` |
-| `postgresdb.postgresdbInternal.instances` | Number of instances | `3` |
-| `postgresdb.postgresdbInternal.storage.size` | Storage size | `5Gi` |
-| `postgresdb.postgresdbInternal.auth.username` | Username | `postgres` |
-| `postgresdb.postgresdbInternal.auth.password` | Password | `super-secret-password` |
-
-### Additional Parameters
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `nodeSelector` | Node selectors | `{}` |
-| `tolerations` | Tolerations | `[]` |
-| `affinity` | Affinity rules | `{}` |
-
-## Usage
-
-```bash
-helm install my-edgedb ./edgedb \
-  --set edgedb.auth.password=mypassword \
-```
-
-## License
-
-MIT License
+| `service.type` | Service type | `
