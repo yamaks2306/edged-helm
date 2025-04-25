@@ -58,15 +58,23 @@ resources:
     cpu: "500m"
 
 readinessProbe:
-  tcpSocket:
-    port: 5656
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+startupProbe:
+  enabled: true
   initialDelaySeconds: 5
   periodSeconds: 10
-livenessProbe:
-  tcpSocket:
-    port: 5656
-  initialDelaySeconds: 15
-  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 30
 
 # GelDB TLS security configuration
 tls:
@@ -82,8 +90,8 @@ tls:
       - GEL
   commonName: "gel.example.com"
   additionalDnsNames: []
-  issuerName: ""
-  issuerKind: ""
+  issuerName: "ca-issuer"
+  issuerKind: "ClusterIssuer"
 
 service:
   type: ClusterIP

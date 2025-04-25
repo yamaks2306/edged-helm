@@ -10,6 +10,6 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - protocol: TCP
-      port: 5656
+      port: {{ .Values.service.port }}
       name: {{ .Values.service.name | quote }}
-      targetPort: 5656 
+      targetPort: {{ .Values.service.port }}

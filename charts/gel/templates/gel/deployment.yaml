@@ -50,13 +50,35 @@ spec:
         resources:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.readinessProbe }}
-        readinessProbe:
-          {{- toYaml . | nindent 10 }}
+        {{- if .Values.startupProbe.enabled }}
+        startupProbe:
+          httpGet:
+            path: /server/status/alive
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.startupProbe.failureThreshold }}
         {{- end }}
-        {{- with .Values.livenessProbe }}
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /server/status/ready
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
-          {{- toYaml . | nindent 10 }}
+          httpGet:
+            path: /server/status/alive
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
         {{- end }}
         ports:
         - containerPort: 5656
@@ -101,6 +123,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
+        - name: GEL_PORT
+          value: {{ .Values.service.port | quote }}
         - name: GEL_INSTANCE_NAME
           value: {{ include "gel.fullname" . }}
         {{- if .Values.tls.enabled }}
@@ -114,7 +138,7 @@ spec:
       {{- if .Values.tls.enabled }}
       - name: tls-cert
         secret:
-          secretName: {{ .Release.Name }}-tls-cert
+          secretName: {{ include "gel.fullname" . }}-tls-cert
       {{- end }}
       {{- if and (not .Values.postgresdb.postgresdbInternal.enabled) (not .Values.postgresdb.postgresdbExternal.enabled) }}
       - name: gel-data
