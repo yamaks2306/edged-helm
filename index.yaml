@@ -81,4 +81,15 @@ entries:
     urls:
     - https://github.com/yamaks2306/edged-helm/releases/download/edgedb-0.1.1/edgedb-0.1.1.tgz
     version: 0.1.1
-generated: "2024-11-08T13:54:17.358182285Z"
+  gel:
+  - apiVersion: v2
+    appVersion: "6.5"
+    created: "2025-04-25T07:57:47.892771515Z"
+    description: GEL helm chart
+    digest: 7a7b073cd81bb567539c1301a75e7ff04ace75c53969a3a2706a83cce0b56e9e
+    name: gel
+    type: application
+    urls:
+    - https://github.com/yamaks2306/edged-helm/releases/download/gel-0.2.0/gel-0.2.0.tgz
+    version: 0.2.0
+generated: "2025-04-25T07:57:47.892799207Z"
